@@ -24,7 +24,9 @@ pipeline {
     stage('Terraform Deploy (dev)') {
       steps {
         dir('terraform/environments/dev') {
+          sh 'rm -rf .terraform'
           sh 'terraform init'
+          sh 'terraform refresh'
           sh 'terraform apply -auto-approve'
         }
       }
@@ -40,6 +42,7 @@ pipeline {
     }
   }
 }
+
 
 
 
