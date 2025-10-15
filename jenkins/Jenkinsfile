@@ -14,7 +14,7 @@ pipeline {
       steps {
         dir('packer') {
           sh 'packer init ubuntu-golden-ami.pkr.hcl'
-          sh './script/build_golden_ami.sh' // Script should store AMI in SSM
+          sh './script/build_golden-ami.sh' // Script should store AMI in SSM
           // Optionally, archive manifest.json as build artifact
           archiveArtifacts artifacts: 'manifest.json', fingerprint: true
         }
@@ -40,6 +40,7 @@ pipeline {
     }
   }
 }
+
 
 
 
