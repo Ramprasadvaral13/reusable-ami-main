@@ -20,7 +20,7 @@ provider "aws" {
 }
 
 module "vpc" {
-  source = "git::https://github.com/Ramprasadvaral13/reusable-ami-module.git//modules/vpc_module?ref=main"
+  source = "git::https://github.com/Ramprasadvaral13/reusable-ami-module.git//networking?ref=main"
 
   vpc_cidr   = var.vpc_cidr
   route_cidr = var.route_cidr
@@ -28,7 +28,7 @@ module "vpc" {
 }
 
 module "compute" {
-  source = "git::https://github.com/Ramprasadvaral13/reusable-ami-module.git//modules/compute_module?ref=main"
+  source = "git::https://github.com/Ramprasadvaral13/reusable-ami-module.git//compute?ref=main"
 
   name_prefix      = "dev"
   vpc_id           = module.vpc.vpc_id
