@@ -29,5 +29,5 @@ instance_type    = "t2.micro"
 min_size         = 2
 max_size         = 4
 desired_capacity = 2
-root_volume_size = 10
+volume_size = 10
 
