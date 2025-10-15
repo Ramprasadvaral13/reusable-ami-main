@@ -35,7 +35,7 @@ variable "desired_capacity" {
   type = number
 }
 
-variable "root_volume_size" {
+variable "volume_size" {
   type = number
 }
 
