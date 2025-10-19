@@ -44,7 +44,7 @@ pipeline {
         dir('terraform/environments/dev') {
           sh 'rm -rf .terraform'
           sh 'terraform init'
-          sh 'terraform refresh'
+          
         }
       }
     }
