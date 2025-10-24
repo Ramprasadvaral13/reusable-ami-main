@@ -44,6 +44,13 @@ build {
       "# Install CloudWatch Agent",
       "curl -O https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb",
       "sudo dpkg -i amazon-cloudwatch-agent.deb || sudo apt-get install -f -y",
+
+      # Install Node.js (LTS version)
+      "curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -",
+      "sudo apt install -y nodejs",
+      "node -v",
+      "npm -v",
+
       "sudo systemctl enable nginx"
     ]
   }
