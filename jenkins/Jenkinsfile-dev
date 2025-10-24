@@ -1,0 +1,37 @@
+pipeline {
+  agent any
+
+  parameters {
+    choice(name: 'TERRAFORM_ACTION', choices: ['apply', 'destroy'], description: 'Apply or Destroy')
+  }
+
+  stages {
+    stage('Checkout') {
+      steps { checkout scm }
+    }
+
+    stage('Terraform Init') {
+      steps {
+        dir('terraform/environments/dev') {
+          sh 'terraform init'
+        }
+      }
+    }
+
+    stage('Terraform Plan & Apply/Destroy') {
+      steps {
+        dir('terraform/environments/dev') {
+          script {
+            if (params.TERRAFORM_ACTION == 'apply') {
+              sh 'terraform plan -out=tfplan'
+              sh 'terraform apply -auto-approve tfplan'
+            } else {
+              input 'Confirm Destroy?'
+              sh 'terraform destroy -auto-approve'
+            }
+          }
+        }
+      }
+    }
+  }
+}
