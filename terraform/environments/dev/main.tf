@@ -38,6 +38,5 @@ module "compute" {
   max_size         = var.max_size
   desired_capacity = var.desired_capacity
   volume_size = var.volume_size
-  key_name = var.key_pair_name
 }
 
