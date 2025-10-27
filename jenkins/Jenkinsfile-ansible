@@ -6,7 +6,6 @@ pipeline {
         AWS_REGION = 'us-east-1'
         INVENTORY_PATH = "${WORKSPACE}/inventory/aws_ec2.yml"
         PATCH_PLAYBOOK = "${WORKSPACE}/patch.yml"
-        DOCKER_PLAYBOOK = "${WORKSPACE}/docker.yml"
     }
     stages {
         stage('Validate AWS Authentication') {
@@ -27,20 +26,6 @@ pipeline {
             steps {
                 dir("${env.WORKSPACE}") {
                     sh "ansible-playbook -i inventory/aws_ec2.yml patch.yml -vvv"
-                }
-            }
-        }
-        stage('Run Docker Installation') {
-            steps {
-                dir("${env.WORKSPACE}") {
-                    sh "ansible-playbook -i inventory/aws_ec2.yml docker.yml -vvv"
-                }
-            }
-        }
-        stage('Verify Docker Installation') {
-            steps {
-                dir("${env.WORKSPACE}") {
-                    sh "ansible -i inventory/aws_ec2.yml env__dev -m command -a 'docker --version' -b"
                 }
             }
         }
