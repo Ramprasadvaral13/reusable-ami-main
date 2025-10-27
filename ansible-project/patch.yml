@@ -1,0 +1,51 @@
+---
+- name: Patch dev EC2 instances
+  hosts: env__dev     # ← exact name from --graph output
+  gather_facts: true
+  become: true
+
+  tasks:
+    - name: Update APT packages (Debian/Ubuntu)
+      ansible.builtin.apt:
+        upgrade: dist
+        update_cache: yes
+      when: ansible_os_family == "Debian"
+
+    - name: Update YUM packages (RHEL/CentOS)
+      ansible.builtin.yum:
+        name: '*'
+        state: latest
+      when: ansible_os_family == "RedHat"
+
+    - name: Reboot if needed (Debian/Ubuntu)
+      ansible.builtin.stat:
+        path: /var/run/reboot-required
+      register: reboot_required_file
+      when: ansible_os_family == "Debian"
+
+    - name: Reboot if kernel updated or required (Debian/Ubuntu)
+      ansible.builtin.reboot:
+        msg: "Rebooting due to package updates (Debian/Ubuntu)"
+        reboot_timeout: 600
+      when:
+        - ansible_os_family == "Debian"
+        - reboot_required_file.stat.exists | default(false)
+
+    - name: Check if YUM needs reboot (RHEL/CentOS)
+      ansible.builtin.shell: |
+        if [ -x /usr/bin/needing-restarting ]; then
+          /usr/bin/needing-restarting -r
+        else
+          echo 0
+        fi
+      register: yum_needs_reboot
+      changed_when: false
+      when: ansible_os_family == "RedHat"
+
+    - name: Reboot if needed (RHEL/CentOS)
+      ansible.builtin.reboot:
+        msg: "Rebooting due to package updates (RHEL/CentOS)"
+        reboot_timeout: 600
+      when:
+        - ansible_os_family == "RedHat"
+        - yum_needs_reboot.stdout | int == 1
