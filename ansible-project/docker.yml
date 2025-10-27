@@ -25,11 +25,11 @@
 
     - name: Add Docker repository
       apt_repository:
-        repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable
+        repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
         state: present
       when: ansible_os_family == 'Debian'
 
-    - name: Install Docker CE
+    - name: Update APT and install Docker CE
       apt:
         name: docker-ce
         state: latest
@@ -43,7 +43,7 @@
         state: started
       when: ansible_os_family == 'Debian'
 
-    - name: Add default user to docker group
+    - name: Add user to docker group
       user:
         name: "{{ ansible_user | default('ubuntu') }}"
         groups: docker
