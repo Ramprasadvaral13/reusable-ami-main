@@ -38,3 +38,15 @@ variable "desired_capacity" {
 variable "volume_size" {
   type = number
 }
+
+variable "instance_profile_name" {
+  type        = string
+  description = "Name of the existing IAM instance profile"
+  default     = "AdminSSMRole"
+}
+
+variable "key_name" {
+  type        = string
+  description = "Name of the existing key pair"
+  default     = "CloudTechv1"
+}
