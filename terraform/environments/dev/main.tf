@@ -41,5 +41,5 @@ module "compute" {
   key_name               = var.key_name
   instance_profile_name  = var.instance_profile_name
 }
-}
+
 
