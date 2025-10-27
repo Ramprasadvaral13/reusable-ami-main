@@ -38,5 +38,8 @@ module "compute" {
   max_size         = var.max_size
   desired_capacity = var.desired_capacity
   volume_size = var.volume_size
+  key_name               = var.key_name
+  instance_profile_name  = var.instance_profile_name
+}
 }
 
