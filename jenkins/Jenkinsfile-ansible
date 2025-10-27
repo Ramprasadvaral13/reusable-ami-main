@@ -1,6 +1,5 @@
 pipeline {
     agent any
-
     environment {
         WORKSPACE = 'ansible-project'
         AWS_PROFILE = 'pro'
@@ -9,55 +8,49 @@ pipeline {
         PATCH_PLAYBOOK = "${WORKSPACE}/patch.yml"
         DOCKER_PLAYBOOK = "${WORKSPACE}/docker.yml"
     }
-
     stages {
-        stage('Validate AWS Auth/Profile') {
+        stage('Validate AWS Authentication') {
             steps {
                 dir("${env.WORKSPACE}") {
                     sh "aws sts get-caller-identity --profile ${env.AWS_PROFILE}"
                 }
             }
         }
-
         stage('Check Ansible Inventory') {
             steps {
                 dir("${env.WORKSPACE}") {
-                    sh "ansible-inventory -i ${env.INVENTORY_PATH} --graph"
+                    sh "ansible-inventory -i inventory/aws_ec2.yml --graph"
                 }
             }
         }
-
         stage('Run Patch Playbook') {
             steps {
                 dir("${env.WORKSPACE}") {
-                    sh "ansible-playbook -i ${env.INVENTORY_PATH} ${env.PATCH_PLAYBOOK} -vvv"
+                    sh "ansible-playbook -i inventory/aws_ec2.yml patch.yml -vvv"
                 }
             }
         }
-
         stage('Run Docker Installation') {
             steps {
                 dir("${env.WORKSPACE}") {
-                    sh "ansible-playbook -i ${env.INVENTORY_PATH} ${env.DOCKER_PLAYBOOK} -vvv"
+                    sh "ansible-playbook -i inventory/aws_ec2.yml docker.yml -vvv"
                 }
             }
         }
-
         stage('Verify Docker Installation') {
             steps {
                 dir("${env.WORKSPACE}") {
-                    sh "ansible -i ${env.INVENTORY_PATH} env__dev -m command -a 'docker --version' -b"
+                    sh "ansible -i inventory/aws_ec2.yml env__dev -m command -a 'docker --version' -b"
                 }
             }
         }
     }
-
     post {
         success {
-            echo 'Jenkins pipeline completed successfully.'
+            echo 'Pipeline completed successfully'
         }
         failure {
-            echo 'Pipeline failed. Please check the logs.'
+            echo 'Pipeline failed, check logs'
         }
         always {
             dir("${env.WORKSPACE}") {
