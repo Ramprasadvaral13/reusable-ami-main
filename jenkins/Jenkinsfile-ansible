@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        WORKSPACE = 'ansible-project'                   // path to your ansible folder in repo
-        AWS_PROFILE = 'pro'                             // AWS CLI profile with credentials
+        WORKSPACE = 'ansible-project'
+        AWS_PROFILE = 'pro'
         AWS_REGION = 'us-east-1'
         INVENTORY_PATH = "${WORKSPACE}/inventory/aws_ec2.yml"
         PATCH_PLAYBOOK = "${WORKSPACE}/patch.yml"
@@ -11,23 +11,7 @@ pipeline {
     }
 
     stages {
-        stage('Debug Environment & Credentials') {
-            steps {
-                dir("${env.WORKSPACE}") {
-                    sh '''
-                        echo "Current User: $(whoami)"
-                        echo "Environment Variables:"
-                        env
-                        echo "Checking .aws config and credentials directory:"
-                        ls -l $HOME/.aws || true
-                        cat $HOME/.aws/config || true
-                        cat $HOME/.aws/credentials || true
-                    '''
-                }
-            }
-        }
-
-        stage('Validate AWS Auth') {
+        stage('Validate AWS Auth/Profile') {
             steps {
                 dir("${env.WORKSPACE}") {
                     sh "aws sts get-caller-identity --profile ${env.AWS_PROFILE}"
@@ -70,10 +54,10 @@ pipeline {
 
     post {
         success {
-            echo 'Pipeline completed successfully.'
+            echo 'Jenkins pipeline completed successfully.'
         }
         failure {
-            echo 'Pipeline failed. Check logs for details.'
+            echo 'Pipeline failed. Please check the logs.'
         }
         always {
             dir("${env.WORKSPACE}") {
