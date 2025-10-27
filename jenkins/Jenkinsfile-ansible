@@ -1,0 +1,78 @@
+pipeline {
+    agent any
+
+    environment {
+        WORKSPACE = 'ansible-project'                   // Name of your Ansible project directory
+        AWS_SSO_PROFILE = 'pro'                        // Your AWS SSO profile name
+        AWS_REGION = 'us-east-1'
+        INVENTORY_PATH = "${WORKSPACE}/inventory/aws_ec2.yml"
+        PATCH_PLAYBOOK = "${WORKSPACE}/patch.yml"
+        DOCKER_PLAYBOOK = "${WORKSPACE}/docker.yml"
+    }
+
+    stages {
+        stage('AWS SSO Login') {
+            steps {
+                dir("${env.WORKSPACE}") {
+                    sh "aws sso login --profile ${env.AWS_SSO_PROFILE}"
+                }
+            }
+        }
+
+        stage('Set AWS Profile') {
+            steps {
+                script {
+                    env.AWS_PROFILE = env.AWS_SSO_PROFILE
+                }
+            }
+        }
+
+        stage('Check Inventory') {
+            steps {
+                dir("${env.WORKSPACE}") {
+                    sh "ansible-inventory -i ${env.INVENTORY_PATH} --graph"
+                }
+            }
+        }
+
+        stage('Run Patch Playbook') {
+            steps {
+                dir("${env.WORKSPACE}") {
+                    sh "ansible-playbook -i ${env.INVENTORY_PATH} ${env.PATCH_PLAYBOOK} -vvv"
+                }
+            }
+        }
+
+        stage('Install Docker') {
+            steps {
+                dir("${env.WORKSPACE}") {
+                    sh "ansible-playbook -i ${env.INVENTORY_PATH} ${env.DOCKER_PLAYBOOK} -vvv"
+                }
+            }
+        }
+        
+        stage('Verify Docker Installation') {
+            steps {
+                dir("${env.WORKSPACE}") {
+                    sh "ansible -i ${env.INVENTORY_PATH} env__dev -m command -a 'docker --version' -b"
+                }
+            }
+        }
+    }
+    
+    post {
+        success {
+            echo 'Jenkins pipeline for Ansible automation finished successfully.'
+        }
+        failure {
+            mail to: 'ops-team@example.com',
+                 subject: "Jenkins Pipeline Failed: ${currentBuild.fullDisplayName}",
+                 body: "The Jenkins job failed. Check console logs and fix issues."
+        }
+        always {
+            dir("${env.WORKSPACE}") {
+                archiveArtifacts artifacts: '**/*.log', allowEmptyArchive: true
+            }
+        }
+    }
+}
