@@ -48,5 +48,5 @@ variable "instance_profile_name" {
 variable "key_name" {
   type        = string
   description = "Name of the existing key pair"
-  default     = "CloudTechv1"
+  default     = "cloudtechdev1"
 }
