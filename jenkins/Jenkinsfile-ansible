@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        WORKSPACE = 'ansible-project'
-        AWS_PROFILE = 'pro' // Your AWS profile (SSO or otherwise)
+        WORKSPACE = 'ansible-project'                   // path to your ansible folder in repo
+        AWS_PROFILE = 'pro'                             // AWS CLI profile with credentials
         AWS_REGION = 'us-east-1'
         INVENTORY_PATH = "${WORKSPACE}/inventory/aws_ec2.yml"
         PATCH_PLAYBOOK = "${WORKSPACE}/patch.yml"
@@ -11,30 +11,30 @@ pipeline {
     }
 
     stages {
-        stage('Debug: Show Jenkins Env, AWS Config') {
+        stage('Debug Environment & Credentials') {
             steps {
                 dir("${env.WORKSPACE}") {
                     sh '''
-                        echo "### WHOAMI"
-                        whoami
-                        echo "### ENV"
+                        echo "Current User: $(whoami)"
+                        echo "Environment Variables:"
                         env
-                        echo "### HOME and .aws config"
-                        ls -l $HOME
+                        echo "Checking .aws config and credentials directory:"
                         ls -l $HOME/.aws || true
                         cat $HOME/.aws/config || true
+                        cat $HOME/.aws/credentials || true
                     '''
                 }
             }
         }
-        stage('Validate AWS Auth/Profile') {
+
+        stage('Validate AWS Auth') {
             steps {
                 dir("${env.WORKSPACE}") {
-                    // This fails the build early if AWS is misconfigured
                     sh "aws sts get-caller-identity --profile ${env.AWS_PROFILE}"
                 }
             }
         }
+
         stage('Check Ansible Inventory') {
             steps {
                 dir("${env.WORKSPACE}") {
@@ -42,6 +42,7 @@ pipeline {
                 }
             }
         }
+
         stage('Run Patch Playbook') {
             steps {
                 dir("${env.WORKSPACE}") {
@@ -49,13 +50,15 @@ pipeline {
                 }
             }
         }
-        stage('Install Docker') {
+
+        stage('Run Docker Installation') {
             steps {
                 dir("${env.WORKSPACE}") {
                     sh "ansible-playbook -i ${env.INVENTORY_PATH} ${env.DOCKER_PLAYBOOK} -vvv"
                 }
             }
         }
+
         stage('Verify Docker Installation') {
             steps {
                 dir("${env.WORKSPACE}") {
@@ -67,10 +70,10 @@ pipeline {
 
     post {
         success {
-            echo 'Jenkins pipeline for Ansible automation finished successfully.'
+            echo 'Pipeline completed successfully.'
         }
         failure {
-            echo 'Pipeline failed! See the logs from early stages for user, env, and auth debugging.'
+            echo 'Pipeline failed. Check logs for details.'
         }
         always {
             dir("${env.WORKSPACE}") {
