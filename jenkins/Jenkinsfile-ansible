@@ -2,7 +2,7 @@ pipeline {
     agent any
     environment {
         WORKSPACE = 'ansible-project'
-        AWS_PROFILE = 'pro'
+        AWS_PROFILE = 'dev'
         AWS_REGION = 'us-east-1'
         INVENTORY_PATH = "${WORKSPACE}/inventory/aws_ec2.yml"
         PATCH_PLAYBOOK = "${WORKSPACE}/patch.yml"
