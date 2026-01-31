@@ -11,4 +11,4 @@ keyed_groups:
     prefix: env_
 hostnames:
   - instance-id
-aws_profile: pro
+aws_profile: dev
